@@ -1,0 +1,21 @@
+{
+  "name": "docxtemplater-cli",
+  "version": "3.5.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "docxtemplater": "./cli.js"
+  },
+  "keywords": [],
+  "author": "Edgar Hipp",
+  "license": "MIT",
+  "dependencies": {
+    "bluerider": "^1.0.0",
+    "docxtemplater": "^3.5.2",
+    "jszip": "^2.6.1",
+    "minimist": "^1.2.0"
+  }
+}
