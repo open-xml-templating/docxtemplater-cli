@@ -7,37 +7,6 @@ const PizZip = require("pizzip");
 const Docxtemplater = require("docxtemplater");
 const expressions = require("angular-expressions");
 
-function showHelp() {
-	console.log("Usage: docxtemplater input.docx data.json output.docx");
-	process.exit(1);
-}
-
-if (argv.help) {
-	showHelp();
-}
-
-function parser(tag) {
-	const expr = expressions.compile(tag.replace(/’/g, "'"));
-	return {
-		get(scope) {
-			return expr(scope);
-		},
-	};
-}
-
-const args = argv._;
-if (args.length !== 3) {
-	showHelp();
-}
-const input = fs.readFileSync(args[0], "binary");
-const data = JSON.parse(fs.readFileSync(args[1], "utf-8"));
-const output = args[2];
-
-const zip = new PizZip(input);
-const doc = new Docxtemplater();
-
-doc.loadZip(zip).setOptions({ parser }).setData(data);
-
 function transformError(error) {
 	const e = {
 		message: error.message,
@@ -54,17 +23,64 @@ function transformError(error) {
 	return e;
 }
 
+function printErrorAndRethrow(error) {
+	const e = transformError(error);
+	// The error thrown here contains additional information when logged with JSON.stringify (it contains a property object).
+	console.error(JSON.stringify({ error: e }, null, 2));
+	throw error;
+}
+
+function showHelp() {
+	console.log("Usage: docxtemplater input.docx data.json output.docx");
+	process.exit(1);
+}
+
+function parser(tag) {
+	const expr = expressions.compile(tag.replace(/’/g, "'"));
+	return {
+		get(scope) {
+			return expr(scope);
+		},
+	};
+}
+
+const args = argv._;
+if (argv.help || args.length !== 3) {
+	showHelp();
+}
+let options = {};
+if (argv.options) {
+	try {
+		options = JSON.parse(argv.options);
+	} catch (e) {
+		console.error("Arguments passed in --options is not valid JSON");
+		throw e;
+	}
+}
+
+const [inputFile, dataFile, outputFile] = args;
+const input = fs.readFileSync(inputFile, "binary");
+const data = JSON.parse(fs.readFileSync(dataFile, "utf-8"));
+options.parser = parser;
+
+let doc;
+
+try {
+	doc = new Docxtemplater(new PizZip(input), options);
+} catch (e) {
+	printErrorAndRethrow();
+}
+
+doc.setData(data);
+
 try {
 	doc.render();
 } catch (error) {
-	const e = transformError(error);
-	// The error thrown here contains additional information when logged with JSON.stringify (it contains a property object).
-	console.log(JSON.stringify({ error: e }, null, 2));
-	throw error;
+	printErrorAndRethrow();
 }
 
 const generated = doc
 	.getZip()
 	.generate({ type: "nodebuffer", compression: "DEFLATE" });
 
-fs.writeFileSync(output, generated);
+fs.writeFileSync(outputFile, generated);
