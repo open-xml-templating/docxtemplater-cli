@@ -3,10 +3,10 @@
 "use strict";
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require("fs");
-const JSZip = require("jszip");
+const PizZip = require("pizzip");
 const Docxtemplater = require("docxtemplater");
 const path = require("path");
-const expressions = require("bluerider");
+const expressions = require("angular-expressions");
 
 function showHelp() {
 	console.log("Usage: docxtemplater input.docx data.json output.docx");
@@ -34,7 +34,7 @@ const input = fs.readFileSync(args[0], "binary");
 const data = JSON.parse(fs.readFileSync(args[1], "utf-8"));
 const output = args[2];
 
-const zip = new JSZip(input);
+const zip = new PizZip(input);
 const doc = new Docxtemplater();
 
 doc.loadZip(zip)
