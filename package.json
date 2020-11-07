@@ -17,5 +17,10 @@
     "docxtemplater": "^3.19.7",
     "minimist": "^1.2.5",
     "pizzip": "^3.0.6"
+  },
+  "devDependencies": {
+    "babel-eslint": "^10.1.0",
+    "eslint": "^7.13.0",
+    "prettier": "^2.1.2"
   }
 }

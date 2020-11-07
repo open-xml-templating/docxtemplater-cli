@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 
 "use strict";
-const argv = require('minimist')(process.argv.slice(2));
+const argv = require("minimist")(process.argv.slice(2));
 const fs = require("fs");
 const PizZip = require("pizzip");
 const Docxtemplater = require("docxtemplater");
-const path = require("path");
 const expressions = require("angular-expressions");
 
 function showHelp() {
@@ -37,9 +36,7 @@ const output = args[2];
 const zip = new PizZip(input);
 const doc = new Docxtemplater();
 
-doc.loadZip(zip)
-	.setOptions({parser})
-	.setData(data)
+doc.loadZip(zip).setOptions({ parser }).setData(data);
 
 function transformError(error) {
 	const e = {
@@ -58,15 +55,16 @@ function transformError(error) {
 }
 
 try {
-	doc.render()
+	doc.render();
 } catch (error) {
-	var e = transformError(error);
+	const e = transformError(error);
 	// The error thrown here contains additional information when logged with JSON.stringify (it contains a property object).
-	console.log(JSON.stringify({error: e}, null, 2));
+	console.log(JSON.stringify({ error: e }, null, 2));
 	throw error;
 }
 
-const generated = doc.getZip()
+const generated = doc
+	.getZip()
 	.generate({ type: "nodebuffer", compression: "DEFLATE" });
 
 fs.writeFileSync(output, generated);
