@@ -1,8 +1,11 @@
 #!/usr/bin/env node
 
 "use strict";
-const argv = require("minimist")(process.argv.slice(2));
+
 const fs = require("fs");
+const path = require("path");
+
+const argv = require("minimist")(process.argv.slice(2));
 const PizZip = require("pizzip");
 const Docxtemplater = require("docxtemplater");
 const expressions = require("angular-expressions");
@@ -57,6 +60,18 @@ if (argv.options) {
 		throw e;
 	}
 }
+if (argv.modules) {
+	try {
+		options.modules = require(path.resolve(process.cwd(), argv.modules));
+	} catch (e) {
+		console.error("Arguments passed in --modules is not a js file");
+		throw e;
+	}
+	if (!(options.modules instanceof Array)) {
+		console.log("Modules should be an array");
+		process.exit(1);
+	}
+}
 
 const [inputFile, dataFile, outputFile] = args;
 const input = fs.readFileSync(inputFile, "binary");
@@ -71,10 +86,8 @@ try {
 	printErrorAndRethrow();
 }
 
-doc.setData(data);
-
 try {
-	doc.render();
+	doc.render(data);
 } catch (error) {
 	printErrorAndRethrow();
 }
